@@ -17,10 +17,7 @@ namespace Converter.Extensions
             var visualizationRoot = new TreeNode();
             Traverse(visualizationRoot, typeTree);
             
-            return new TreeVisualization
-            {
-                Root = visualizationRoot
-            }.ToString();
+            return new TreeVisualization(visualizationRoot).ToString();
         }
 
         private static void Traverse(TreeNode node, TypeTree typeTree)

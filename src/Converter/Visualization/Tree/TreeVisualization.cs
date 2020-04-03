@@ -4,6 +4,11 @@
     {
         public override string[] Tags => new[] {"tree"};
 
-        public TreeNode Root { get; set; }
+        public TreeVisualization(TreeNode root)
+        {
+            Root = root;
+        }
+
+        public TreeNode Root { get; }
     }
 }

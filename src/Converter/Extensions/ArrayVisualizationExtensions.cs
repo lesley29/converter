@@ -4,7 +4,7 @@ namespace Converter.Extensions
 {
     public static class ArrayVisualizationExtensions
     {
-        public static string Visualize<T>(this T[] array) 
+        public static string Visualize<T>(this T[] array)
             where T : struct
         {
             var gridVisualization = new GridVisualization();
