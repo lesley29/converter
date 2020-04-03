@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using Converter.Extraction;
 using Converter.Visualization.Tree;
 
@@ -8,74 +12,97 @@ namespace Converter.Extensions
     {
         public static string Visualize(this Type type)
         {
-            var tree = TypeTree.From(type);
+            var typeTree = TypeTree.From(type);
             
-            var root = new TreeVisualization.TreeNode();
-            Traverse(root, tree);
+            var visualizationRoot = new TreeNode();
+            Traverse(visualizationRoot, typeTree);
             
             return new TreeVisualization
             {
-                Root = root
+                Root = visualizationRoot
             }.ToString();
         }
 
-        private static void Traverse(TreeVisualization.TreeNode node, TypeTree typeTree)
+        private static void Traverse(TreeNode node, TypeTree typeTree)
         {
-            node.Value = typeTree.Type.FullName;
-
-            // base types
-            if (typeTree.DirectImplementedInterfaces != null)
-            {
-                var baseTypesChild = new TreeVisualization.TreeNode
-                {
-                    Name = "Base types"
-                };
-
-                foreach (var implementedInterface in typeTree.DirectImplementedInterfaces)
-                {
-                    var interfaceNode = new TreeVisualization.TreeNode();
-                    Traverse(interfaceNode, implementedInterface);
-                    baseTypesChild.Children.Add(interfaceNode);
-                }
+            var nodeValueBuilder = new StringBuilder(typeTree.Type.Name);
             
-                node.Children.Add(baseTypesChild);
+            if (typeTree.DirectlyImplementedInterfaces != null)
+            {
+                AddBaseTypes(node, typeTree.DirectlyImplementedInterfaces);
             }
-
-            // generic arguments
+            
             if (typeTree.GenericArguments != null)
             {
-                var genericArgumentsChild = new TreeVisualization.TreeNode
-                {
-                    Name = "Generic arguments"
-                };
-
-                foreach (var genericArgument in typeTree.GenericArguments)
-                {
-                    genericArgumentsChild.Children.Add(Traverse(genericArgument));
-                }
-                
-                node.Children.Add(genericArgumentsChild);
+                AddGenericArguments(node, typeTree.GenericArguments);
+                nodeValueBuilder.Append($"<{string.Join(", ", node.Children.First().Children.Select(ch => ch.Value))}>");
             }
+            
+            node.Value = nodeValueBuilder.ToString().RemoveNumberOfGenericArguments();
+        }
+        
+        private static void AddBaseTypes(TreeNode node, IEnumerable<TypeTree> baseTypes)
+        {
+            var baseTypesChild = new TreeNode
+            {
+                Name = "Base types"
+            };
+
+            foreach (var baseType in baseTypes)
+            {
+                var interfaceNode = new TreeNode();
+                Traverse(interfaceNode, baseType);
+                baseTypesChild.Children.Add(interfaceNode);
+            }
+            
+            node.Children.Add(baseTypesChild);
+        }
+        
+        private static void AddGenericArguments(TreeNode node, IEnumerable<GenericArgument> genericArguments)
+        {
+            var genericArgumentsChild = new TreeNode
+            {
+                Name = "Generic arguments"
+            };
+                
+            foreach (var genericArgument in genericArguments)
+            {
+                genericArgumentsChild.Children.Add(BuildGenericArgumentNodeFor(genericArgument));
+            }
+                
+            node.Children.Add(genericArgumentsChild);
         }
 
-        private static TreeVisualization.TreeNode Traverse(TypeTree.GenericArgument genericArgument)
+        private static TreeNode BuildGenericArgumentNodeFor(GenericArgument genericArgument)
         {
-            var treeNode = new TreeVisualization.TreeNode
+            var valueBuilder = new StringBuilder(genericArgument.Type.Name);
+            
+            var treeNode = new TreeNode
             {
                 Id = genericArgument.DefinitionType.Name,
-                Name = "->",
-                Value = genericArgument.Type.FullName
+                Name = "->"
             };
 
             if (genericArgument.GenericArguments != null)
             {
-                foreach (var argument in genericArgument.GenericArguments)
+                foreach (var childTreeNode in genericArgument.GenericArguments.Select(BuildGenericArgumentNodeFor))
                 {
-                    treeNode.Children.Add(Traverse(argument));
+                    treeNode.Children.Add(childTreeNode);
                 }
-            }
 
+                valueBuilder.Append($"<{string.Join(", ", treeNode.Children.Select(ch => ch.Value))}>");
+            }
+            
+            treeNode.Value = valueBuilder.ToString().RemoveNumberOfGenericArguments();
+            
             return treeNode;
+        }
+
+        private static string RemoveNumberOfGenericArguments(this string s)
+        {
+            const string pattern = @"`\d+<";
+            
+            return Regex.Replace(s, pattern, "<", RegexOptions.Compiled);
         }
     }
 }

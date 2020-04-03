@@ -13,7 +13,7 @@ namespace Converter.Extraction
         
         public Type Type { get; }
 
-        public List<TypeTree>? DirectImplementedInterfaces { get; set; }
+        public List<TypeTree>? DirectlyImplementedInterfaces { get; set; }
 
         public List<GenericArgument>? GenericArguments { get; set; }
 
@@ -39,7 +39,7 @@ namespace Converter.Extraction
 
             if (directInterfaces.Any())
             {
-                DirectImplementedInterfaces = directInterfaces.Select(GetTypeTree).ToList();
+                DirectlyImplementedInterfaces = directInterfaces.Select(GetTypeTree).ToList();
             }
 
             return this;
@@ -75,21 +75,6 @@ namespace Converter.Extraction
             }
 
             return arguments;
-        }
-        
-        public class GenericArgument
-        {
-            public GenericArgument(Type type, Type definitionType)
-            {
-                Type = type;
-                DefinitionType = definitionType;
-            }
-
-            public Type DefinitionType { get; }
-        
-            public Type Type { get; }
-
-            public List<GenericArgument>? GenericArguments { get; set; }
         }
     }
 }

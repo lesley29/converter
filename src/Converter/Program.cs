@@ -44,7 +44,7 @@ namespace Converter
 
         private static void TestTypes()
         {
-            // typeof(List<string>).Visualize();
+            // var type = typeof(Dictionary<string, int>);
             var type = typeof(Dictionary<Tuple<int, string>, List<HashSet<double>>>);
             Console.Out.WriteLine(type.Visualize());
             type.Visualize();

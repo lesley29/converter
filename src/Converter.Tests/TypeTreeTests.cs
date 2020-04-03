@@ -41,7 +41,7 @@ namespace Converter.Tests
             var tree = TypeTree.From(typeof(NonGenericNoInterfacesClass));
 
             // Assert
-            Assert.Null(tree.DirectImplementedInterfaces);
+            Assert.Null(tree.DirectlyImplementedInterfaces);
         }
 
         [Fact]
@@ -64,9 +64,9 @@ namespace Converter.Tests
             var tree = TypeTree.From(typeof(ClassWithInterfaces));
 
             // Assert
-            Assert.NotNull(tree.DirectImplementedInterfaces);
-            Assert.NotEmpty(tree.DirectImplementedInterfaces);
-            Assert.Equal(expectedInterfaces, tree.DirectImplementedInterfaces.Select(t => t.Type));
+            Assert.NotNull(tree.DirectlyImplementedInterfaces);
+            Assert.NotEmpty(tree.DirectlyImplementedInterfaces);
+            Assert.Equal(expectedInterfaces, tree.DirectlyImplementedInterfaces.Select(t => t.Type));
         }
 
         [Fact]
@@ -79,12 +79,12 @@ namespace Converter.Tests
             var tree = TypeTree.From(typeof(ClassWithInheritedInterfaces));
 
             // Assert
-            Assert.Single(tree.DirectImplementedInterfaces);
-            var nestedTree = tree.DirectImplementedInterfaces.First();
+            Assert.Single(tree.DirectlyImplementedInterfaces);
+            var nestedTree = tree.DirectlyImplementedInterfaces.First();
             
             Assert.Equal(typeof(IFooBar), nestedTree.Type);
-            Assert.NotNull(nestedTree.DirectImplementedInterfaces);
-            Assert.Equal(expectedNestedTreeInterfaces, nestedTree.DirectImplementedInterfaces.Select(t => t.Type));
+            Assert.NotNull(nestedTree.DirectlyImplementedInterfaces);
+            Assert.Equal(expectedNestedTreeInterfaces, nestedTree.DirectlyImplementedInterfaces.Select(t => t.Type));
             
         }
         
